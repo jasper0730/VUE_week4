@@ -13,11 +13,11 @@ const app = createApp({
     },
     data() {
         return {
-            products:[],
-            tempData:{
-                imagesUrl:[]
+            products: [],
+            tempData: {
+                imagesUrl: []
             },
-            isAdd: false,
+            isNew: false,
             pagination: {},
         }
     },
@@ -32,13 +32,17 @@ const app = createApp({
                 })
                 .catch((err) => {
                     alert(err.data.message);
+                    window.location = 'index.html'
                 })
         },
         getData(page = 1) { // 預設值為1,若未傳入page就會帶入預設值
+            if (page === 'current') {
+                page = this.pagination.current_page;
+            };
             const url = `${site}/api/${api_path}/admin/products/?page=${page}`;
             axios.get(url)
-                .then((res)=>{
-                    this.products = res.data.products;  
+                .then((res) => {
+                    this.products = res.data.products;
                     this.pagination = res.data.pagination;
                 })
                 .catch((err) => {
@@ -46,25 +50,25 @@ const app = createApp({
                 })
         },
         openModal(status, item) {
-            if(status === 'isNew') {
+            if (status === 'new') {
                 // 如果點到的是新增產品,就先將tempData內的資料先清空初始化
                 this.tempData = {
-                    imagesUrl:[]
+                    imagesUrl: []
                 };
+                this.isNew = true;
                 productModal.show();
                 // 這裡的isAdd是為了判斷點擊確認時要新增還是編輯
-                this.isAdd = true;
-            }else if(status === 'edit') {
+            } else if (status === 'edit') {
                 this.tempData = JSON.parse(JSON.stringify(item));
+                this.isNew = false;
                 productModal.show();
-                this.isAdd = false;
-            }else if(status === 'delete') {
+            } else if (status === 'delete') {
                 this.tempData = JSON.parse(JSON.stringify(item));
                 delModal.show();
             }
-            
+
         },
-        
+
     },
     mounted() {
         this.checkLogin();
@@ -78,23 +82,23 @@ const app = createApp({
     },
 })
 // 新增、編輯的modal元件
-app.component('productModal',{
-    props:['tempData','isNew'], // 自定義的名稱,需與本元件的參數名稱相同
-    template:`#templateForProductModal`, // 對應html的template
-    methods:{
+app.component('productModal', {
+    props: ['tempData', 'isNew'], // 自定義的名稱,需與本元件的參數名稱相同
+    template: `#templateForProductModal`, // 對應html的template
+    methods: {
         updateData() {
             // 預設為新增的axios
             let url = `${site}/api/${api_path}/admin/product`;  // 新增的axios
-            let method = 'post'; 
+            let method = 'post';
             // 如果點擊後isNew為false則等於觸發編輯的axios
-            if(!this.isNew) {
+            if (!this.isNew) {
                 url = `${site}/api/${api_path}/admin/product/${this.tempData.id}`;  // 編輯的axios
-                method = 'put'; 
+                method = 'put';
             }
-            axios[method](url,{data: this.tempData})
-                .then((res)=>{
+            axios[method](url, { data: this.tempData })
+                .then((res) => {
                     productModal.hide();
-                    this.$emit('get-data') // 自定義名稱,要使用外層元件的方法
+                    this.$emit('get-data','current') // 自定義名稱,要使用外層元件的方法
                 })
                 .catch((err) => {
                     alert(err.data.message)
@@ -103,14 +107,14 @@ app.component('productModal',{
     }
 })
 // 刪除的modal元件
-app.component('delProductModal',{
-    props:['tempData'],
-    template:`#templateForDelProductModal`, // 對應html的template
-    methods:{
+app.component('delProductModal', {
+    props: ['tempData'],
+    template: `#templateForDelProductModal`, // 對應html的template
+    methods: {
         deleteData() {
             const url = `${site}/api/${api_path}/admin/product/${this.tempData.id}`;
             axios.delete(url)
-                .then((res)=>{
+                .then((res) => {
                     delModal.hide();
                     this.$emit('get-data')
                 })

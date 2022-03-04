@@ -28,7 +28,7 @@
     <div id="app">
         <div class="container">
             <div class="text-end mt-4">
-                <button class="btn btn-primary" @click="openModal('isNew')">
+                <button class="btn btn-primary" @click="openModal('new')">
                     建立新的產品
                 </button>
             </div>
@@ -65,10 +65,12 @@
                         </td>
                         <td>
                             <div class="btn-group">
-                                <button type="button" class="btn btn-outline-primary btn-sm ms-1" @click="openModal('edit', item)">
+                                <button type="button" class="btn btn-outline-primary btn-sm ms-1"
+                                    @click="openModal('edit', item)">
                                     編輯
                                 </button>
-                                <button type="button" class="btn btn-outline-danger btn-sm ms-1" @click="openModal('delete',item)">
+                                <button type="button" class="btn btn-outline-danger btn-sm ms-1"
+                                    @click="openModal('delete',item)">
                                     刪除
                                 </button>
                             </div>
@@ -83,7 +85,7 @@
             aria-hidden="true">
             <!-- 這邊的@get-data是productModal元件內的emit自定義名稱,"getData"是主元件要拿來用的函式 -->
             <!-- 這裡的:temp-data是productModal元件內的props自定義名稱,-->
-            <product-modal :temp-data="tempData" @get-data="getData" :is-new="isAdd"></product-modal>
+            <product-modal :temp-data="tempData" @get-data="getData" :is-new="isNew"></product-modal>
         </div>
         <div id="delProductModal" ref="delProductModal" class="modal fade" tabindex="-1"
             aria-labelledby="delProductModalLabel" aria-hidden="true">
@@ -91,13 +93,14 @@
         </div>
         <!-- Modal -->
     </div>
-<!--ProductModal -->
+    <!--ProductModal -->
     <script type="text/x-template" id="templateForProductModal">
         <div class="modal-dialog modal-xl">
                 <div class="modal-content border-0">
                     <div class="modal-header bg-dark text-white">
                         <h5 id="productModalLabel" class="modal-title">
-                            <span>新增產品</span>
+                            <span v-if="isNew">新增產品</span>
+                            <span v-else>編輯產品</span>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -123,6 +126,12 @@
                                         <button v-if="!tempData.imagesUrl.length || tempData.imagesUrl[tempData.imagesUrl.length - 1]" type="button" class="btn btn-outline-primary w-100" @click="tempData.imagesUrl.push('')">新增圖片</button>
                                         <button v-else type="button" class="btn btn-outline-danger w-100" @click="tempData.imagesUrl.pop()">刪除圖片</button>
                                     </div>
+                                    <div v-else>
+                                        <button class="btn btn-outline-primary btn-sm d-block w-100"
+                                          @click="createImages">
+                                          新增圖片
+                                        </button>
+                                      </div>
                                 </div>
                             </div>
                             <div class="col-sm-8">
@@ -193,8 +202,8 @@
                 </div>
             </div>
     </script>
-<!-- DeleteModal -->
-    <script  type="text/x-template" id="templateForDelProductModal">
+    <!-- DeleteModal -->
+    <script type="text/x-template" id="templateForDelProductModal">
         <div class="modal-dialog">
                 <div class="modal-content border-0">
                     <div class="modal-header bg-danger text-white">
